@@ -1,0 +1,15 @@
+{
+  "name": "starpower-reward-chart",
+  "version": "1.0.0",
+  "description": "Tuck & Ellie's Star Power Reward Chart",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "engines": {
+    "node": "18.x"
+  }
+}
