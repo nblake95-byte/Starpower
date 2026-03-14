@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⭐ Star Power!</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sun: #FFD600;
+    --grass: #66BB6A;
+    --pink: #FF6B9D;
+    --purple: #9C6FE4;
+    --card-bg: rgba(255,255,255,0.92);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(180deg, #87CEEB 0%, #B2EBF2 40%, #A5D6A7 100%);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+  .cloud {
+    position: fixed;
+    background: white;
+    border-radius: 50px;
+    opacity: 0.85;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .cloud::before, .cloud::after {
+    content: '';
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+  }
+  .cloud-1 { width: 120px; height: 40px; top: 8%; left: -130px; animation: floatCloud 18s linear infinite; }
+  .cloud-1::before { width: 60px; height: 60px; top: -30px; left: 15px; }
+  .cloud-1::after { width: 45px; height: 45px; top: -20px; left: 50px; }
+  .cloud-2 { width: 90px; height: 30px; top: 20%; left: -100px; animation: floatCloud 24s linear infinite 6s; }
+  .cloud-2::before { width: 50px; height: 50px; top: -25px; left: 10px; }
+  .cloud-2::after { width: 35px; height: 35px; top: -15px; left: 40px; }
+  .cloud-3 { width: 150px; height: 45px; top: 5%; left: -160px; animation: floatCloud 20s linear infinite 12s; }
+  .cloud-3::before { width: 70px; height: 70px; top: -35px; left: 20px; }
+  .cloud-3::after { width: 55px; height: 55px; top: -25px; left: 65px; }
+  @keyframes floatCloud {
+    from { left: -200px; }
+    to { left: 110vw; }
+  }
+  .sun {
+    position: fixed;
+    top: 20px; right: 30px;
+    width: 80px; height: 80px;
+    background: var(--sun);
+    border-radius: 50%;
+    box-shadow: 0 0 0 12px rgba(255,214,0,0.25), 0 0 0 24px rgba(255,214,0,0.12);
+    animation: sunPulse 3s ease-in-out infinite;
+    z-index: 0;
+  }
+  @keyframes sunPulse {
+    0%, 100% { box-shadow: 0 0 0 12px rgba(255,214,0,0.25), 0 0 0 24px rgba(255,214,0,0.12); }
+    50% { box-shadow: 0 0 0 18px rgba(255,214,0,0.3), 0 0 0 36px rgba(255,214,0,0.15); }
+  }
+  .star-float {
+    position: fixed;
+    font-size: 1.4rem;
+    pointer-events: none;
+    z-index: 0;
+    animation: starDrift linear infinite;
+    opacity: 0;
+  }
+  @keyframes starDrift {
+    0% { opacity: 0; transform: translateY(0) rotate(0deg); }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { opacity: 0; transform: translateY(-100vh) rotate(360deg); }
+  }
+  .sync-bar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: var(--grass);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease, opacity 0.5s ease;
+    z-index: 999;
+    opacity: 0;
+  }
+  .sync-bar.saving { transform: scaleX(0.7); opacity: 1; }
+  .sync-bar.saved { transform: scaleX(1); opacity: 0; transition: transform 0.2s ease, opacity 0.8s ease 0.3s; }
+  .sync-bar.error { background: #FF6B6B; transform: scaleX(1); opacity: 1; }
+  .sync-status {
+    position: fixed;
+    top: 10px; left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.55);
+    color: white;
+    font-family: 'Fredoka One', cursive;
+    font-size: 0.8rem;
+    padding: 4px 14px;
+    border-radius: 20px;
+    z-index: 998;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .sync-status.show { opacity: 1; }
+  .wrapper {
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px 16px 60px;
+  }
+  header { text-align: center; margin-bottom: 28px; }
+  header h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(2.2rem, 6vw, 3.4rem);
+    color: white;
+    text-shadow: 3px 4px 0px rgba(0,0,0,0.15);
+    letter-spacing: 1px;
+    line-height: 1.1;
+  }
+  header p {
+    color: white;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-top: 6px;
+    text-shadow: 1px 2px 0 rgba(0,0,0,0.1);
+  }
+  .loading-screen {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(180deg, #87CEEB 0%, #B2EBF2 60%, #A5D6A7 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    transition: opacity 0.5s ease;
+  }
+  .loading-screen.hidden { opacity: 0; pointer-events: none; }
+  .loading-screen .load-emoji { font-size: 4rem; animation: bounce 1s ease-in-out infinite; }
+  .loading-screen p {
+    font-family: 'Fredoka One', cursive;
+    color: white;
+    font-size: 1.4rem;
+    margin-top: 16px;
+    text-shadow: 2px 3px 0 rgba(0,0,0,0.1);
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+  .kids-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  @media (max-width: 540px) {
+    .kids-grid { grid-template-columns: 1fr; }
+  }
+  .kid-card {
+    background: var(--card-bg);
+    border-radius: 28px;
+    padding: 22px 20px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.13);
+    border: 4px solid transparent;
+    transition: transform 0.2s;
+    text-align: center;
+  }
+  .kid-card:hover { transform: translateY(-3px); }
+  .kid-card.kid-0 { border-color: var(--purple); }
+  .kid-card.kid-1 { border-color: var(--pink); }
+  .kid-avatar {
+    font-size: 3.2rem;
+    margin-bottom: 6px;
+    display: block;
+    animation: bounce 2s ease-in-out infinite;
+  }
+  .kid-name {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.5rem;
+    margin-bottom: 2px;
+  }
+  .kid-card.kid-0 .kid-name { color: var(--purple); }
+  .kid-card.kid-1 .kid-name { color: var(--pink); }
+  .kid-age {
+    font-size: 0.78rem;
+    color: #888;
+    font-weight: 700;
+    margin-bottom: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .star-count {
+    font-family: 'Fredoka One', cursive;
+    font-size: 2.6rem;
+    line-height: 1;
+  }
+  .kid-card.kid-0 .star-count { color: var(--purple); }
+  .kid-card.kid-1 .star-count { color: var(--pink); }
+  .star-label {
+    font-size: 0.8rem;
+    color: #aaa;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+  .star-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    justify-content: center;
+    min-height: 36px;
+    margin-bottom: 14px;
+  }
+  .star-pip {
+    font-size: 1.4rem;
+    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1));
+    animation: starPop 0.3s ease;
+  }
+  @keyframes starPop {
+    0% { transform: scale(0) rotate(-30deg); }
+    70% { transform: scale(1.3) rotate(5deg); }
+    100% { transform: scale(1) rotate(0deg); }
+  }
+  .star-pip.empty { filter: grayscale(1) opacity(0.25); }
+  .btn-group { display: flex; gap: 8px; justify-content: center; }
+  .btn {
+    border: none;
+    border-radius: 50px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 8px 18px;
+    transition: transform 0.12s, box-shadow 0.12s;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.15);
+  }
+  .btn:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,0.15); }
+  .btn-remove { background: #eee; color: #999; }
+  .progress-section { margin-bottom: 8px; }
+  .progress-label {
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: #aaa;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+    text-align: left;
+  }
+  .progress-bar-bg {
+    background: #e9e9e9;
+    border-radius: 20px;
+    height: 16px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 20px;
+    transition: width 0.5s cubic-bezier(.34,1.56,.64,1);
+    background: linear-gradient(90deg, var(--sun), #FF8C42);
+  }
+  .kid-card.kid-0 .progress-bar-fill {
+    background: linear-gradient(90deg, var(--purple), var(--pink));
+  }
+  .reward-at {
+    font-size: 0.72rem;
+    color: #ccc;
+    text-align: right;
+    font-weight: 700;
+    margin-top: 3px;
+  }
+  .panel {
+    background: var(--card-bg);
+    border-radius: 24px;
+    padding: 22px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    margin-bottom: 16px;
+  }
+  .panel-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.3rem;
+    color: #555;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .behaviors-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+  }
+  .behavior-btn {
+    background: white;
+    border: 3px solid #f0f0f0;
+    border-radius: 18px;
+    padding: 12px 10px;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.82rem;
+    text-align: center;
+    transition: all 0.15s;
+    color: #444;
+  }
+  .behavior-btn:hover { border-color: var(--sun); background: #FFFDE7; transform: scale(1.03); }
+  .behavior-btn .beh-icon { font-size: 1.6rem; display: block; margin-bottom: 4px; }
+  .behavior-btn .beh-pts {
+    display: inline-block;
+    background: var(--sun);
+    color: #333;
+    border-radius: 20px;
+    font-size: 0.68rem;
+    font-weight: 900;
+    padding: 1px 8px;
+    margin-top: 4px;
+  }
+  .who-row { display: flex; gap: 10px; margin-bottom: 14px; }
+  .who-btn {
+    flex: 1;
+    padding: 10px;
+    border: 3px solid #eee;
+    border-radius: 50px;
+    background: white;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: #999;
+  }
+  .who-btn.active-0 { border-color: var(--purple); color: var(--purple); background: #F5F0FF; }
+  .who-btn.active-1 { border-color: var(--pink); color: var(--pink); background: #FFF0F6; }
+  .rewards-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+  }
+  .reward-item {
+    background: white;
+    border: 3px solid #f0f0f0;
+    border-radius: 18px;
+    padding: 14px 12px;
+    text-align: center;
+    font-weight: 800;
+    font-size: 0.82rem;
+    color: #444;
+    transition: all 0.15s;
+  }
+  .reward-item .r-icon { font-size: 1.8rem; display: block; margin-bottom: 4px; }
+  .reward-item .r-cost {
+    background: var(--grass);
+    color: white;
+    border-radius: 20px;
+    font-size: 0.68rem;
+    padding: 2px 10px;
+    display: inline-block;
+    margin-top: 4px;
+    font-weight: 900;
+  }
+  .reward-item.can-afford { border-color: var(--grass); background: #F1FFF3; cursor: pointer; }
+  .reward-item.can-afford:hover { transform: scale(1.05); }
+  .reward-item.cannot-afford { opacity: 0.45; }
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: #333;
+    color: white;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.1rem;
+    padding: 14px 28px;
+    border-radius: 50px;
+    z-index: 1000;
+    transition: transform 0.4s cubic-bezier(.34,1.56,.64,1);
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .burst {
+    position: fixed;
+    pointer-events: none;
+    z-index: 500;
+    font-size: 2rem;
+    animation: burstAnim 1.2s ease forwards;
+  }
+  @keyframes burstAnim {
+    0% { opacity: 1; transform: scale(0.5) translateY(0); }
+    100% { opacity: 0; transform: scale(1.5) translateY(-80px); }
+  }
+  .history-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 220px;
+    overflow-y: auto;
+  }
+  .history-list li {
+    background: white;
+    border-radius: 14px;
+    padding: 8px 14px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #555;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-left: 5px solid #eee;
+  }
+  .history-list li.h-0 { border-color: var(--purple); }
+  .history-list li.h-1 { border-color: var(--pink); }
+  .history-list li .h-time { color: #ccc; font-size: 0.72rem; margin-left: auto; white-space: nowrap; }
+  .empty-state { color: #ccc; font-weight: 700; font-size: 0.9rem; text-align: center; padding: 20px 0; }
+</style>
+</head>
+<body>
+
+<div class="loading-screen" id="loadingScreen">
+  <div class="load-emoji">⭐</div>
+  <p>Loading Star Power...</p>
+</div>
+
+<div class="sync-bar" id="syncBar"></div>
+<div class="sync-status" id="syncStatus"></div>
+
+<div class="sun"></div>
+<div class="cloud cloud-1"></div>
+<div class="cloud cloud-2"></div>
+<div class="cloud cloud-3"></div>
+
+<div class="wrapper">
+  <header>
+    <h1>⭐ Star Power! ⭐</h1>
+    <p>Earn stars for being awesome! 🌈</p>
+  </header>
+
+  <div class="kids-grid" id="kidsGrid"></div>
+
+  <div class="panel">
+    <div class="panel-title">🏆 Earn Stars For...</div>
+    <div class="who-row">
+      <button class="who-btn active-0" onclick="selectKid(0)" id="whoBtn0">🦖 For Tuck</button>
+      <button class="who-btn" onclick="selectKid(1)" id="whoBtn1">🦋 For Ellie</button>
+    </div>
+    <div class="behaviors-grid" id="behaviorsGrid"></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">🎁 Spend Your Stars!</div>
+    <div class="rewards-list" id="rewardsList"></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">📖 Star Log</div>
+    <ul class="history-list" id="historyList"></ul>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const REWARD_GOAL = 10;
+const kids = [
+  { name: "Tuck", age: 5, avatar: "🦖", idx: 0 },
+  { name: "Ellie", age: 3, avatar: "🦋", idx: 1 }
+];
+const behaviors = [
+  { icon: "👂", label: "Listened 1st Time!", pts: 3 },
+  { icon: "🛁", label: "Bath Time!", pts: 1 },
+  { icon: "🛌", label: "Bedtime Hero", pts: 2 },
+  { icon: "🍽️", label: "Ate Dinner", pts: 1 },
+  { icon: "🧹", label: "Helped Clean", pts: 2 },
+  { icon: "🤝", label: "Shared Nicely", pts: 2 },
+  { icon: "👕", label: "Got Dressed", pts: 1 },
+  { icon: "💖", label: "Was Kind", pts: 2 },
+  { icon: "😤", label: "Stayed Calm", pts: 3 },
+  { icon: "🙋", label: "Used Nice Words", pts: 1 },
+];
+const rewards = [
+  { icon: "🌟", label: "Sticker Pack", cost: 3 },
+  { icon: "🍭", label: "Lollipop", cost: 5 },
+  { icon: "📺", label: "Extra Episode", cost: 8 },
+  { icon: "🎁", label: "Small Toy", cost: 10 },
+  { icon: "🍦", label: "Ice Cream Trip", cost: 15 },
+  { icon: "🧸", label: "New Stuffie", cost: 25 },
+];
+
+let state = { stars: [0, 0], history: [], selectedKid: 0 };
+let saveTimer = null;
+
+async function loadFromServer() {
+  try {
+    const res = await fetch('/api/state');
+    if (!res.ok) throw new Error('load failed');
+    const data = await res.json();
+    state.stars = data.stars || [0, 0];
+    state.history = data.history || [];
+  } catch(e) {
+    showSyncStatus('⚠️ Could not load — check connection', true);
+  }
+}
+
+async function saveToServer() {
+  setSyncBar('saving');
+  try {
+    const res = await fetch('/api/state', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ stars: state.stars, history: state.history })
+    });
+    if (!res.ok) throw new Error('save failed');
+    setSyncBar('saved');
+  } catch(e) {
+    setSyncBar('error');
+    showSyncStatus('⚠️ Save failed — check connection', true);
+  }
+}
+
+function scheduleSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => saveToServer(), 600);
+}
+
+function setSyncBar(s) {
+  document.getElementById('syncBar').className = 'sync-bar ' + s;
+}
+
+let syncStatusTimer;
+function showSyncStatus(msg, isError = false) {
+  const el = document.getElementById('syncStatus');
+  el.textContent = msg;
+  el.className = 'sync-status show' + (isError ? ' error' : '');
+  clearTimeout(syncStatusTimer);
+  syncStatusTimer = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+function selectKid(idx) {
+  state.selectedKid = idx;
+  document.getElementById('whoBtn0').className = 'who-btn' + (idx === 0 ? ' active-0' : '');
+  document.getElementById('whoBtn1').className = 'who-btn' + (idx === 1 ? ' active-1' : '');
+  renderRewards();
+}
+
+function addStars(pts, label) {
+  const k = state.selectedKid;
+  state.stars[k] += pts;
+  logHistory(k, `+${pts} ⭐ ${label}`);
+  scheduleSave();
+  renderAll();
+  showToast(`${kids[k].avatar} +${pts} star${pts > 1 ? 's' : ''}! ${label}`);
+  burst();
+}
+
+function removeStarManual(kidIdx) {
+  if (state.stars[kidIdx] <= 0) return;
+  state.stars[kidIdx]--;
+  logHistory(kidIdx, `-1 ⭐ (removed)`);
+  scheduleSave();
+  renderAll();
+}
+
+function spendStars(icon, label, cost) {
+  const k = state.selectedKid;
+  if (state.stars[k] < cost) {
+    showToast('Not enough stars yet! Keep going! 💪');
+    return;
+  }
+  state.stars[k] -= cost;
+  logHistory(k, `-${cost} ⭐ → ${icon} ${label}`);
+  scheduleSave();
+  renderAll();
+  showToast(`${kids[k].avatar} Enjoy your ${label}! 🎉`);
+  bigBurst();
+}
+
+function logHistory(kidIdx, text) {
+  const now = new Date();
+  const t = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  state.history.unshift({ kid: kidIdx, text, time: t });
+  if (state.history.length > 40) state.history.pop();
+}
+
+function renderAll() {
+  renderKids();
+  renderBehaviors();
+  renderRewards();
+  renderHistory();
+}
+
+function renderKids() {
+  const grid = document.getElementById('kidsGrid');
+  grid.innerHTML = '';
+  kids.forEach((kid, i) => {
+    const stars = state.stars[i];
+    const progress = Math.min(stars, REWARD_GOAL);
+    const pct = (progress / REWARD_GOAL) * 100;
+    let pipsHtml = '';
+    for (let s = 0; s < Math.min(stars, REWARD_GOAL); s++) pipsHtml += `<span class="star-pip">⭐</span>`;
+    for (let s = stars; s < REWARD_GOAL; s++) pipsHtml += `<span class="star-pip empty">⭐</span>`;
+    grid.innerHTML += `
+      <div class="kid-card kid-${i}">
+        <span class="kid-avatar">${kid.avatar}</span>
+        <div class="kid-name">${kid.name}</div>
+        <div class="kid-age">Age ${kid.age}</div>
+        <div class="star-count">${stars}</div>
+        <div class="star-label">total stars</div>
+        <div class="star-row">${pipsHtml}</div>
+        <div class="progress-section">
+          <div class="progress-label">Next reward progress</div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" style="width:${pct}%"></div>
+          </div>
+          <div class="reward-at">${progress}/${REWARD_GOAL} ⭐</div>
+        </div>
+        <div class="btn-group" style="margin-top:10px">
+          <button class="btn btn-remove" onclick="removeStarManual(${i})">− Remove Star</button>
+        </div>
+      </div>`;
+  });
+}
+
+function renderBehaviors() {
+  document.getElementById('behaviorsGrid').innerHTML = behaviors.map(b => `
+    <button class="behavior-btn" onclick="addStars(${b.pts}, '${b.label}')">
+      <span class="beh-icon">${b.icon}</span>
+      ${b.label}
+      <br><span class="beh-pts">+${b.pts} ⭐</span>
+    </button>`).join('');
+}
+
+function renderRewards() {
+  const k = state.selectedKid;
+  const stars = state.stars[k];
+  document.getElementById('rewardsList').innerHTML = rewards.map(r => {
+    const can = stars >= r.cost;
+    return `
+      <div class="reward-item ${can ? 'can-afford' : 'cannot-afford'}"
+        ${can ? `onclick="spendStars('${r.icon}','${r.label}',${r.cost})"` : ''}>
+        <span class="r-icon">${r.icon}</span>
+        ${r.label}
+        <br><span class="r-cost">${r.cost} ⭐</span>
+      </div>`;
+  }).join('');
+}
+
+function renderHistory() {
+  const list = document.getElementById('historyList');
+  if (!state.history.length) {
+    list.innerHTML = '<div class="empty-state">No stars earned yet — let\'s go! 🚀</div>';
+    return;
+  }
+  list.innerHTML = state.history.map(h => `
+    <li class="h-${h.kid}">
+      ${kids[h.kid].avatar} ${h.text}
+      <span class="h-time">${h.time}</span>
+    </li>`).join('');
+}
+
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+function burst() {
+  const emojis = ['⭐','✨','🌟','💫'];
+  for (let i = 0; i < 5; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'burst';
+      el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      el.style.left = (30 + Math.random() * 40) + 'vw';
+      el.style.top = (20 + Math.random() * 40) + 'vh';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 1300);
+    }, i * 100);
+  }
+}
+
+function bigBurst() {
+  const emojis = ['🎉','⭐','🌟','💫','✨','🎊','🏆'];
+  for (let i = 0; i < 14; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'burst';
+      el.style.fontSize = (1.5 + Math.random() * 1.5) + 'rem';
+      el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      el.style.left = (10 + Math.random() * 80) + 'vw';
+      el.style.top = (15 + Math.random() * 60) + 'vh';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 1300);
+    }, i * 80);
+  }
+}
+
+function spawnFloatStar() {
+  const el = document.createElement('div');
+  el.className = 'star-float';
+  el.textContent = ['⭐','✨','💫','🌟'][Math.floor(Math.random() * 4)];
+  el.style.left = Math.random() * 100 + 'vw';
+  el.style.bottom = '-40px';
+  el.style.fontSize = (0.8 + Math.random() * 1.2) + 'rem';
+  const dur = 8 + Math.random() * 12;
+  el.style.animationDuration = dur + 's';
+  el.style.animationDelay = Math.random() * 4 + 's';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), (dur + 4) * 1000);
+}
+
+setInterval(async () => {
+  await loadFromServer();
+  renderAll();
+}, 10000);
+
+(async () => {
+  await loadFromServer();
+  renderAll();
+  setInterval(spawnFloatStar, 2500);
+  setTimeout(() => {
+    document.getElementById('loadingScreen').classList.add('hidden');
+  }, 600);
+})();
+</script>
+</body>
+</html>
